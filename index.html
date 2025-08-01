@@ -20,26 +20,20 @@
     .linkedin-auth:hover {
       background-color: #004182;
     }
-    .service-unavailable {
-      background-color: #fef3c7;
-      border-left: 4px solid #f59e0b;
-    }
-    .vpn-suggestion {
-      background-color: #ecfdf5;
-      border-left: 4px solid #10b981;
+    .fallback-option {
+      background-color: #f0fdf4;
+      border-left: 4px solid #22c55e;
     }
   </style>
 </head>
 <body class="bg-gray-50">
   <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
     
-    <!-- Header -->
     <header class="text-center py-6">
       <h1 class="text-2xl md:text-3xl font-bold text-[#0A66C2]">مدیریت حرفه‌ای لینکدین</h1>
       <p class="text-gray-600 mt-2">اتصال هوشمند رزومه، تولید محتوا و تحلیل پیشرفته</p>
     </header>
 
-    <!-- LinkedIn Auth Section -->
     <section class="bg-white rounded-xl shadow-sm p-6">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">اتصال به حساب لینکدین</h2>
       <div id="authSection">
@@ -50,192 +44,210 @@
         <p class="text-sm text-gray-500 mt-3">برای استفاده از تمام قابلیت‌ها، لطفاً حساب لینکدین خود را متصل کنید</p>
       </div>
       
-      <!-- Service Status Messages -->
-      <div id="serviceUnavailable" class="hidden mt-4 p-4 rounded-lg service-unavailable">
-        <div class="flex items-start">
-          <i class="fas fa-exclamation-triangle text-yellow-600 mt-1 ml-2"></i>
-          <div>
-            <h3 class="font-medium text-yellow-800">مشکل در اتصال به LinkedIn</h3>
-            <p class="text-sm text-yellow-700 mt-1" id="serviceMessage"></p>
-            <div class="mt-3 flex items-center text-sm text-yellow-800">
-              <i class="fas fa-sync-alt ml-2"></i>
-              <span id="retryCounter"></span>
-            </div>
+      <div id="fallbackSection" class="hidden mt-6 p-4 rounded-lg fallback-option">
+        <h3 class="font-medium text-green-800 mb-2">راهکارهای جایگزین</h3>
+        <div class="space-y-3">
+          <div class="p-3 bg-white rounded-lg border">
+            <h4 class="font-medium flex items-center">
+              <i class="fas fa-globe ml-2 text-blue-500"></i>
+              روش ۱: استفاده از پروکسی سرور
+            </h4>
+            <p class="text-sm text-gray-600 mt-1">این روش از یک سرور واسط برای اتصال استفاده می‌کند:</p>
+            <button id="proxyAuth" class="mt-2 bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm">
+              <i class="fas fa-server ml-1"></i> اتصال از طریق پروکسی
+            </button>
           </div>
-        </div>
-      </div>
-      
-      <div id="vpnSuggestion" class="hidden mt-4 p-4 rounded-lg vpn-suggestion">
-        <div class="flex items-start">
-          <i class="fas fa-globe-europe text-green-600 mt-1 ml-2"></i>
-          <div>
-            <h3 class="font-medium text-green-800">راهکار جایگزین</h3>
-            <p class="text-sm text-green-700 mt-1">به نظر می‌رسد محدودیت منطقه‌ای دارید. استفاده از VPN ممکن است مشکل را حل کند.</p>
-            <button id="tryWithVPN" class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm">
-              <i class="fas fa-redo ml-1"></i> تلاش با VPN
+          
+          <div class="p-3 bg-white rounded-lg border">
+            <h4 class="font-medium flex items-center">
+              <i class="fas fa-mobile-alt ml-2 text-purple-500"></i>
+              روش ۲: دریافت کد دستی
+            </h4>
+            <p class="text-sm text-gray-600 mt-1">می‌توانید به صورت دستی از LinkedIn کد دریافت کنید:</p>
+            <button id="manualAuth" class="mt-2 bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm">
+              <i class="fas fa-keyboard ml-1"></i> راهنمای دریافت کد دستی
             </button>
           </div>
         </div>
       </div>
       
       <div id="profileSection" class="hidden mt-4 p-4 bg-gray-50 border rounded-lg">
-        <!-- Profile content -->
+        <!-- محتوای پروفایل -->
       </div>
     </section>
 
+    <!-- Modal برای دریافت کد دستی -->
+    <div id="manualAuthModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full">
+        <h3 class="font-bold text-lg mb-4">دریافت کد دستی از LinkedIn</h3>
+        <ol class="list-decimal list-inside space-y-2 text-sm">
+          <li>به <a href="https://www.linkedin.com" target="_blank" class="text-blue-500">LinkedIn</a> وارد شوید</li>
+          <li>به این آدرس بروید: <code class="bg-gray-100 p-1 rounded">https://www.linkedin.com/developers/tools/oauth</code></li>
+          <li>مقادیر زیر را وارد کنید:
+            <ul class="list-disc list-inside mt-1 ml-4">
+              <li>Client ID: <code class="bg-gray-100 p-1 rounded">78iihkedifumfl</code></li>
+              <li>Redirect URI: <code class="bg-gray-100 p-1 rounded">https://hosseincagey.github.io/linkdin/auth</code></li>
+              <li>Scope: <code class="bg-gray-100 p-1 rounded">r_liteprofile r_emailaddress</code></li>
+            </ul>
+          </li>
+          <li>روی دکمه "Get Authorization Code" کلیک کنید</li>
+          <li>کد دریافتی را در اینجا وارد کنید:</li>
+        </ol>
+        <div class="mt-4">
+          <input type="text" id="manualAuthCode" placeholder="کد دریافتی" class="w-full p-2 border rounded">
+          <button id="submitManualCode" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded w-full">
+            تایید کد
+          </button>
+        </div>
+        <button id="closeManualModal" class="mt-3 text-gray-500 w-full">انصراف</button>
+      </div>
+    </div>
   </div>
 
   <script>
     // ==================== تنظیمات پیشرفته ====================
     const LINKEDIN_CONFIG = {
       CLIENT_ID: '78iihkedifumfl',
-      CLIENT_SECRET: 'WPL_AP1.7tqHsAYYjoe31Ciz.C9cQPA==',
+      CLIENT_SECRET: 'WPL_AP1.Oqh5rNxg9fLnm2zf.4D/X4g==',
       REDIRECT_URI: encodeURIComponent('https://hosseincagey.github.io/linkdin/auth'),
       SCOPE: encodeURIComponent('r_liteprofile r_emailaddress'),
       STATE: '123456',
-      HEALTH_CHECK_INTERVAL: 30000,
-      MAX_RETRIES: 3,
-      ALTERNATE_ENDPOINTS: [
-        'https://www.linkedin.com',
-        'https://api.linkedin.com',
-        'https://www.linkedin.cn' // برای مناطق با محدودیت
-      ]
+      PROXY_SERVER: 'https://cors-proxy.example.com/api/linkedin' // جایگزین با آدرس پروکسی واقعی
     };
 
     // ==================== عناصر DOM ====================
     const authBtn = document.getElementById('linkedInAuth');
-    const serviceUnavailable = document.getElementById('serviceUnavailable');
-    const serviceMessage = document.getElementById('serviceMessage');
-    const retryCounter = document.getElementById('retryCounter');
-    const vpnSuggestion = document.getElementById('vpnSuggestion');
-    const tryWithVPN = document.getElementById('tryWithVPN');
-    
-    let currentEndpointIndex = 0;
-    let retryCount = 0;
-    let retryTimer;
+    const fallbackSection = document.getElementById('fallbackSection');
+    const proxyAuth = document.getElementById('proxyAuth');
+    const manualAuth = document.getElementById('manualAuth');
+    const manualAuthModal = document.getElementById('manualAuthModal');
+    const closeManualModal = document.getElementById('closeManualModal');
+    const submitManualCode = document.getElementById('submitManualCode');
+    const manualAuthCode = document.getElementById('manualAuthCode');
 
-    // ==================== بررسی سلامت با endpointهای مختلف ====================
-    async function checkLinkedInHealth() {
-      try {
-        const endpoint = LINKEDIN_CONFIG.ALTERNATE_ENDPOINTS[currentEndpointIndex];
-        
-        // استفاده از API سلامت LinkedIn با timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        
-        const response = await fetch(`${endpoint}/health`, {
-          method: 'GET',
-          mode: 'no-cors',
-          cache: 'no-cache',
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        
-        // اگر به این نقطه رسیدیم یعنی سرویس در دسترس است
-        resetServiceStatus();
-        return true;
-      } catch (error) {
-        console.error(`خطا در بررسی سلامت (Endpoint ${currentEndpointIndex}):`, error);
-        
-        // اگر endpoint فعلی کار نکرد، بعدی را امتحان کنیم
-        if (currentEndpointIndex < LINKEDIN_CONFIG.ALTERNATE_ENDPOINTS.length - 1) {
-          currentEndpointIndex++;
-          return checkLinkedInHealth();
+    // ==================== مدیریت احراز هویت اصلی ====================
+    authBtn.addEventListener('click', () => {
+      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CONFIG.CLIENT_ID}&redirect_uri=${LINKEDIN_CONFIG.REDIRECT_URI}&scope=${LINKEDIN_CONFIG.SCOPE}&state=${LINKEDIN_CONFIG.STATE}`;
+      
+      // باز کردن در پنجره جدید با کنترل بیشتر
+      const authWindow = window.open(authUrl, '_blank', 'width=600,height=700');
+      
+      // بررسی وضعیت پنجره هر 500ms
+      const checkWindow = setInterval(() => {
+        if (authWindow.closed) {
+          clearInterval(checkWindow);
+          checkForError();
         }
-        
-        // اگر همه endpointها امتحان شدند و کار نکردند
-        handleServiceError(error);
-        return false;
+      }, 500);
+      
+      // بعد از 10 ثانیه اگر پنجره باز بود و مشکلی پیش آمد
+      setTimeout(() => {
+        if (!authWindow.closed) {
+          authWindow.close();
+          showFallbackOptions();
+        }
+      }, 10000);
+    });
+
+    // ==================== بررسی خطا ====================
+    function checkForError() {
+      // اینجا می‌توانید localStorage یا sessionStorage را برای خطا بررسی کنید
+      if (sessionStorage.getItem('linkedin_error')) {
+        showFallbackOptions();
+        sessionStorage.removeItem('linkedin_error');
       }
     }
 
-    // ==================== مدیریت خطای سرویس ====================
-    function handleServiceError(error) {
-      retryCount++;
-      
-      // تشخیص نوع خطا
-      const isNetworkError = error.message.includes('Failed to fetch') || error.message.includes('NetworkError');
-      const isTimeoutError = error.message.includes('aborted');
-      
-      if (isNetworkError || isTimeoutError) {
-        serviceMessage.textContent = 'مشکل در اتصال به سرورهای LinkedIn. ممکن است محدودیت منطقه‌ای وجود داشته باشد.';
-        vpnSuggestion.classList.remove('hidden');
-      } else {
-        serviceMessage.textContent = 'سرویس LinkedIn موقتاً در دسترس نیست. لطفاً چند دقیقه دیگر تلاش کنید.';
-      }
-      
-      serviceUnavailable.classList.remove('hidden');
+    // ==================== نمایش راهکارهای جایگزین ====================
+    function showFallbackOptions() {
+      fallbackSection.classList.remove('hidden');
       authBtn.disabled = true;
-      
-      if (retryCount >= LINKEDIN_CONFIG.MAX_RETRIES) {
-        retryCounter.textContent = 'حداکثر تعداد تلاش‌ها انجام شد. لطفاً بعداً تلاش کنید.';
+    }
+
+    // ==================== احراز هویت از طریق پروکسی ====================
+    proxyAuth.addEventListener('click', async () => {
+      try {
+        const response = await fetch(LINKEDIN_CONFIG.PROXY_SERVER, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            client_id: LINKEDIN_CONFIG.CLIENT_ID,
+            redirect_uri: decodeURIComponent(LINKEDIN_CONFIG.REDIRECT_URI),
+            scope: decodeURIComponent(LINKEDIN_CONFIG.SCOPE)
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.authUrl) {
+          window.location.href = data.authUrl;
+        } else {
+          alert('خطا در ارتباط با سرور پروکسی');
+        }
+      } catch (error) {
+        console.error('خطا در اتصال به پروکسی:', error);
+        alert('خطا در اتصال به سرور پروکسی');
+      }
+    });
+
+    // ==================== مدیریت احراز هویت دستی ====================
+    manualAuth.addEventListener('click', () => {
+      manualAuthModal.classList.remove('hidden');
+    });
+
+    closeManualModal.addEventListener('click', () => {
+      manualAuthModal.classList.add('hidden');
+    });
+
+    submitManualCode.addEventListener('click', async () => {
+      const code = manualAuthCode.value.trim();
+      if (!code) {
+        alert('لطفاً کد دریافتی را وارد کنید');
         return;
       }
       
-      let seconds = 30;
-      retryCounter.textContent = `تلاش مجدد در ${seconds} ثانیه...`;
-      
-      retryTimer = setInterval(() => {
-        seconds--;
-        retryCounter.textContent = `تلاش مجدد در ${seconds} ثانیه...`;
+      // ارسال کد به سرور برای دریافت توکن
+      try {
+        // این بخش نیاز به پیاده‌سازی سمت سرور دارد
+        const response = await fetch('https://your-backend.com/api/linkedin/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: code,
+            redirect_uri: decodeURIComponent(LINKEDIN_CONFIG.REDIRECT_URI),
+            client_id: LINKEDIN_CONFIG.CLIENT_ID,
+            client_secret: LINKEDIN_CONFIG.CLIENT_SECRET
+          })
+        });
         
-        if (seconds <= 0) {
-          clearInterval(retryTimer);
-          currentEndpointIndex = 0; // بازگشت به endpoint اول
-          checkLinkedInHealth();
+        const data = await response.json();
+        
+        if (data.access_token) {
+          localStorage.setItem('linkedin_token', data.access_token);
+          manualAuthModal.classList.add('hidden');
+          alert('اتصال با موفقیت انجام شد!');
+          // ادامه فرآیند...
+        } else {
+          throw new Error(data.error || 'خطا در دریافت توکن');
         }
-      }, 1000);
-    }
-
-    // ==================== بازنشانی وضعیت سرویس ====================
-    function resetServiceStatus() {
-      serviceUnavailable.classList.add('hidden');
-      vpnSuggestion.classList.add('hidden');
-      authBtn.disabled = false;
-      retryCount = 0;
-      currentEndpointIndex = 0;
-      clearInterval(retryTimer);
-    }
-
-    // ==================== تلاش با VPN ====================
-    tryWithVPN.addEventListener('click', () => {
-      serviceMessage.textContent = 'در حال تلاش برای اتصال از طریق مسیرهای جایگزین...';
-      retryCounter.textContent = 'لطفاً صبر کنید...';
-      currentEndpointIndex = LINKEDIN_CONFIG.ALTERNATE_ENDPOINTS.length - 1; // استفاده از endpoint جایگزین
-      checkLinkedInHealth();
-    });
-
-    // ==================== مدیریت احراز هویت با بررسی کامل ====================
-    authBtn.addEventListener('click', async () => {
-      const isHealthy = await checkLinkedInHealth();
-      
-      if (isHealthy) {
-        const endpoint = LINKEDIN_CONFIG.ALTERNATE_ENDPOINTS[currentEndpointIndex];
-        const authUrl = `${endpoint}/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CONFIG.CLIENT_ID}&redirect_uri=${LINKEDIN_CONFIG.REDIRECT_URI}&scope=${LINKEDIN_CONFIG.SCOPE}&state=${LINKEDIN_CONFIG.STATE}`;
-        
-        // باز کردن در تب جدید برای جلوگیری از مسدود شدن
-        window.open(authUrl, '_blank');
+      } catch (error) {
+        console.error('خطا در احراز هویت دستی:', error);
+        alert(error.message);
       }
     });
 
-    // ==================== شروع نظارت بر سرویس ====================
-    function startServiceMonitoring() {
-      // چک اولیه
-      checkLinkedInHealth();
-      
-      // چک دوره‌ای
-      setInterval(() => {
-        if (!serviceUnavailable.classList.contains('hidden')) {
-          checkLinkedInHealth();
-        }
-      }, LINKEDIN_CONFIG.HEALTH_CHECK_INTERVAL);
-    }
-
     // ==================== مقداردهی اولیه ====================
     document.addEventListener('DOMContentLoaded', () => {
-      startServiceMonitoring();
-      // سایر توابع مقداردهی اولیه...
+      // بررسی وجود توکن در localStorage
+      if (localStorage.getItem('linkedin_token')) {
+        // کاربر قبلاً وارد شده است
+        document.getElementById('profileSection').classList.remove('hidden');
+        authBtn.style.display = 'none';
+      }
     });
   </script>
 </body>
