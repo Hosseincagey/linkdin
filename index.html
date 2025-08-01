@@ -6,7 +6,6 @@
   <title>سیستم مدیریت حرفه‌ای لینکدین</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
     @font-face {
       font-family: 'Vazir';
@@ -24,28 +23,27 @@
   </style>
 </head>
 <body class="bg-gray-50">
-
   <div class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
-
+    
     <!-- Header -->
     <header class="text-center py-6">
       <h1 class="text-2xl md:text-3xl font-bold text-[#0A66C2]">مدیریت حرفه‌ای لینکدین</h1>
       <p class="text-gray-600 mt-2">اتصال هوشمند رزومه، تولید محتوا و تحلیل پیشرفته</p>
     </header>
 
-    <!-- LinkedIn OAuth 2.0 Integration -->
+    <!-- LinkedIn Auth Section -->
     <section class="bg-white rounded-xl shadow-sm p-6">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">اتصال به حساب لینکدین</h2>
       <div id="authSection">
-        <a href="#" id="linkedInAuth" class="linkedin-auth flex items-center justify-center w-full max-w-xs mx-auto text-white font-medium py-2.5 px-4 rounded-lg transition duration-200">
+        <button id="linkedInAuth" class="linkedin-auth flex items-center justify-center w-full max-w-xs mx-auto text-white font-medium py-2.5 px-4 rounded-lg transition duration-200">
           <i class="fab fa-linkedin-in ml-2 text-lg"></i>
           <span>اتصال با لینکدین</span>
-        </a>
+        </button>
         <p class="text-sm text-gray-500 mt-3">برای استفاده از تمام قابلیت‌ها، لطفاً حساب لینکدین خود را متصل کنید</p>
       </div>
       <div id="profileSection" class="hidden mt-4 p-4 bg-gray-50 border rounded-lg">
         <div class="flex items-center">
-          <img id="profileImage" src="" alt="Profile" class="w-16 h-16 rounded-full object-cover">
+          <img id="profileImage" src="" alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
           <div class="mr-3">
             <h3 id="profileName" class="font-medium text-gray-800"></h3>
             <p id="profileHeadline" class="text-sm text-gray-600"></p>
@@ -53,533 +51,95 @@
         </div>
         <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
           <p><span class="font-medium">صنعت:</span> <span id="profileIndustry"></span></p>
+          <p><span class="font-medium">ایمیل:</span> <span id="profileEmail"></span></p>
           <p><span class="font-medium">موقعیت:</span> <span id="profilePosition"></span></p>
-          <p><span class="font-medium">مکان:</span> <span id="profileLocation"></span></p>
-          <p><span class="font-medium">اتصال:</span> <span id="profileConnections"></span></p>
+          <p><span class="font-medium">شناسه کاربری:</span> <span id="profileId"></span></p>
         </div>
+        <button id="logoutBtn" class="mt-4 text-red-600 hover:text-red-800 text-sm">
+          <i class="fas fa-sign-out-alt ml-1"></i> خروج از حساب
+        </button>
       </div>
     </section>
 
-    <!-- Resume Parser -->
-    <section class="bg-white rounded-xl shadow-sm p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">تحلیل هوشمند رزومه</h2>
-      <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-        <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx,.txt" class="hidden">
-        <label for="resumeUpload" class="cursor-pointer flex flex-col items-center justify-center">
-          <i class="fas fa-cloud-upload-alt text-4xl text-[#0A66C2] mb-3"></i>
-          <p class="font-medium text-gray-700">رزومه خود را اینجا رها کنید یا برای انتخاب کلیک کنید</p>
-          <p class="text-sm text-gray-500 mt-1">فرمت‌های قابل قبول: PDF, Word, Text</p>
-        </label>
-      </div>
-      <div id="resumeAnalysis" class="hidden mt-6">
-        <div class="grid md:grid-cols-3 gap-4">
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <h3 class="font-medium text-blue-800">مهارت‌های کلیدی</h3>
-            <ul id="skillsList" class="mt-2 space-y-1"></ul>
-          </div>
-          <div class="bg-green-50 p-4 rounded-lg">
-            <h3 class="font-medium text-green-800">تجربه کاری</h3>
-            <div id="experienceList" class="mt-2 space-y-3"></div>
-          </div>
-          <div class="bg-purple-50 p-4 rounded-lg">
-            <h3 class="font-medium text-purple-800">تحصیلات</h3>
-            <div id="educationList" class="mt-2 space-y-3"></div>
-          </div>
-        </div>
-        <div class="mt-4 bg-yellow-50 p-4 rounded-lg">
-          <h3 class="font-medium text-yellow-800">پیشنهادات بهبود رزومه</h3>
-          <div id="suggestionsList" class="mt-2 space-y-2"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI Content Generator -->
-    <section class="bg-white rounded-xl shadow-sm p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">تولید محتوای هوشمند</h2>
-      <div class="grid md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">نوع محتوا</label>
-          <select id="contentType" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#0A66C2]">
-            <option value="post">پست حرفه‌ای</option>
-            <option value="article">مقاله تخصصی</option>
-            <option value="carousel">کاروسل چندرسانه‌ای</option>
-            <option value="poll">نظرسنجی</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">سبک نوشتار</label>
-          <select id="writingStyle" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#0A66C2]">
-            <option value="professional">حرفه‌ای</option>
-            <option value="casual">غیررسمی</option>
-            <option value="persuasive">متقاعدکننده</option>
-            <option value="storytelling">روایت‌گونه</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">طول محتوا</label>
-          <select id="contentLength" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#0A66C2]">
-            <option value="short">کوتاه (1-2 پاراگراف)</option>
-            <option value="medium">متوسط (3-4 پاراگراف)</option>
-            <option value="long">طولانی (5+ پاراگراف)</option>
-          </select>
-        </div>
-      </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1">موضوع اصلی</label>
-        <input type="text" id="contentTopic" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#0A66C2]" placeholder="موضوع محتوای مورد نظر خود را وارد کنید...">
-      </div>
-      <button id="generateContent" class="w-full bg-[#0A66C2] text-white py-2.5 px-4 rounded-lg hover:bg-[#004182] transition duration-200">
-        <i class="fas fa-magic ml-2"></i> تولید محتوا
-      </button>
-      <div id="contentResult" class="hidden mt-6 p-4 bg-gray-50 border rounded-lg">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="font-medium text-gray-800">محتوای تولید شده</h3>
-          <div class="flex space-x-2">
-            <button id="copyContent" class="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">
-              <i class="fas fa-copy ml-1"></i> کپی
-            </button>
-            <button id="postToLinkedIn" class="text-sm bg-[#0A66C2] hover:bg-[#004182] text-white px-3 py-1 rounded">
-              <i class="fab fa-linkedin-in ml-1"></i> انتشار
-            </button>
-          </div>
-        </div>
-        <div id="generatedContent" class="prose max-w-none"></div>
-      </div>
-    </section>
-
-    <!-- Analytics Dashboard -->
-    <section class="bg-white rounded-xl shadow-sm p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">تحلیل‌گر عملکرد</h2>
-      <div class="grid md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-blue-50 p-4 rounded-lg">
-          <p class="text-sm text-blue-800">تعداد نمایش پروفایل</p>
-          <p class="text-2xl font-bold text-blue-900 mt-1">1,248</p>
-          <p class="text-xs text-blue-700 mt-1">+12% نسبت به ماه گذشته</p>
-        </div>
-        <div class="bg-green-50 p-4 rounded-lg">
-          <p class="text-sm text-green-800">مشاهده پست‌ها</p>
-          <p class="text-2xl font-bold text-green-900 mt-1">5,736</p>
-          <p class="text-xs text-green-700 mt-1">+28% نسبت به ماه گذشته</p>
-        </div>
-        <div class="bg-purple-50 p-4 rounded-lg">
-          <p class="text-sm text-purple-800">تعامل (Engagement)</p>
-          <p class="text-2xl font-bold text-purple-900 mt-1">8.2%</p>
-          <p class="text-xs text-purple-700 mt-1">+3% نسبت به ماه گذشته</p>
-        </div>
-        <div class="bg-yellow-50 p-4 rounded-lg">
-          <p class="text-sm text-yellow-800">درخواست‌های ارتباط</p>
-          <p class="text-2xl font-bold text-yellow-900 mt-1">87</p>
-          <p class="text-xs text-yellow-700 mt-1">+15% نسبت به ماه گذشته</p>
-        </div>
-      </div>
-      <div class="bg-white p-4 border rounded-lg">
-        <h3 class="font-medium text-gray-800 mb-3">روند عملکرد ماهانه</h3>
-        <div class="h-64" id="analyticsChart"></div>
-      </div>
-    </section>
+    <!-- بقیه بخش های برنامه... -->
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // LinkedIn API Configuration
-    const LINKEDIN_API_KEY = 'YOUR_API_KEY';
-    const LINKEDIN_REDIRECT_URI = 'YOUR_REDIRECT_URI';
-    
-    // Initialize LinkedIn SDK
-    document.getElementById('linkedInAuth').addEventListener('click', async function(e) {
-      e.preventDefault();
-      await initLinkedInAuth();
+    // ==================== تنظیمات شما ====================
+    const LINKEDIN_CONFIG = {
+      CLIENT_ID: '86t9m8q3t5kkyy', // جایگزین کنید
+      CLIENT_SECRET: 'YOUR_CLIENT_SECRET', // جایگزین کنید
+      REDIRECT_URI: encodeURIComponent('http://localhost:3000/auth.html'), // باید با تنظیمات LinkedIn تطابق داشته باشد
+      SCOPE: encodeURIComponent('r_liteprofile r_emailaddress'),
+      STATE: '123456' // برای جلوگیری از CSRF
+    };
+
+    // ==================== عناصر DOM ====================
+    const authBtn = document.getElementById('linkedInAuth');
+    const profileSection = document.getElementById('profileSection');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // ==================== مدیریت احراز هویت ====================
+    authBtn.addEventListener('click', () => {
+      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CONFIG.CLIENT_ID}&redirect_uri=${LINKEDIN_CONFIG.REDIRECT_URI}&scope=${LINKEDIN_CONFIG.SCOPE}&state=${LINKEDIN_CONFIG.STATE}`;
+      window.location.href = authUrl;
     });
 
-    async function initLinkedInAuth() {
-      try {
-        // In a real app, you would use the LinkedIn OAuth 2.0 flow
-        // This is a simulation of the authentication process
-        
-        // Show loading state
-        document.getElementById('linkedInAuth').innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال اتصال...';
-        
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Mock profile data
-        const profileData = {
-          name: "علی رضایی",
-          headline: "مدیر محصول دیجیتال | متخصص رشد کسب‌وکار",
-          industry: "فناوری اطلاعات و خدمات",
-          position: "مدیر ارشد محصول در شرکت نمونه",
-          location: "تهران، ایران",
-          connections: "500+",
-          profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
-        };
-        
-        // Display profile
-        displayProfile(profileData);
-        
-        // Store access token (in a real app, you would securely store this)
-        localStorage.setItem('linkedin_access_token', 'mock_access_token_12345');
-        
-        // Show success message
-        showToast('اتصال با لینکدین با موفقیت انجام شد!', 'success');
-      } catch (error) {
-        console.error('Authentication error:', error);
-        showToast('خطا در اتصال به لینکدین', 'error');
-        document.getElementById('linkedInAuth').innerHTML = '<i class="fab fa-linkedin-in ml-2"></i> اتصال با لینکدین';
+    // ==================== مدیریت خروج ====================
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('linkedin_token');
+      localStorage.removeItem('linkedin_profile');
+      profileSection.classList.add('hidden');
+      authBtn.style.display = 'flex';
+      showToast('با موفقیت خارج شدید', 'success');
+    });
+
+    // ==================== نمایش پروفایل ====================
+    function displayProfile(profile) {
+      document.getElementById('profileName').textContent = profile.name;
+      document.getElementById('profileHeadline').textContent = profile.headline || 'بدون عنوان';
+      document.getElementById('profileEmail').textContent = profile.email;
+      document.getElementById('profileId').textContent = profile.id;
+      document.getElementById('profileImage').src = profile.picture || 'https://via.placeholder.com/150';
+      
+      profileSection.classList.remove('hidden');
+      authBtn.style.display = 'none';
+    }
+
+    // ==================== بررسی وضعیت ورود ====================
+    function checkAuthStatus() {
+      const token = localStorage.getItem('linkedin_token');
+      const profile = localStorage.getItem('linkedin_profile');
+      
+      if (token && profile) {
+        displayProfile(JSON.parse(profile));
+        authBtn.style.display = 'none';
       }
     }
 
-    function displayProfile(data) {
-      document.getElementById('authSection').classList.add('hidden');
-      document.getElementById('profileSection').classList.remove('hidden');
-      
-      document.getElementById('profileName').textContent = data.name;
-      document.getElementById('profileHeadline').textContent = data.headline;
-      document.getElementById('profileIndustry').textContent = data.industry;
-      document.getElementById('profilePosition').textContent = data.position;
-      document.getElementById('profileLocation').textContent = data.location;
-      document.getElementById('profileConnections').textContent = data.connections;
-      document.getElementById('profileImage').src = data.profileImage;
-    }
-
-    // Resume Parser
-    document.getElementById('resumeUpload').addEventListener('change', async function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      // Validate file type
-      const validTypes = ['application/pdf', 'application/msword', 
-                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                         'text/plain'];
-      if (!validTypes.includes(file.type)) {
-        showToast('لطفاً فقط فایل‌های PDF, Word یا Text آپلود کنید', 'error');
-        return;
-      }
-      
-      // Show loading
-      showToast('در حال تحلیل رزومه...', 'info');
-      
-      try {
-        // In a real app, you would upload to your backend for processing
-        // This is a simulation with mock data after a delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Mock analysis results
-        const analysisResults = {
-          skills: ['مدیریت محصول', 'تحلیل داده', 'توسعه استراتژی', 'رهبری تیم', 'تحلیل بازار'],
-          experience: [
-            {
-              title: 'مدیر ارشد محصول',
-              company: 'شرکت نمونه',
-              duration: '2020 - حال حاضر',
-              description: 'هدایت تیم محصول و توسعه راهکارهای دیجیتال'
-            },
-            {
-              title: 'تحلیلگر ارشد کسب‌وکار',
-              company: 'شرکت فناوری',
-              duration: '2018 - 2020',
-              description: 'تحلیل نیازهای بازار و طراحی راهکارهای فنی'
-            }
-          ],
-          education: [
-            {
-              degree: 'کارشناسی ارشد مدیریت کسب‌وکار',
-              university: 'دانشگاه تهران',
-              year: '2017'
-            },
-            {
-              degree: 'کارشناسی مهندسی صنایع',
-              university: 'دانشگاه شریف',
-              year: '2014'
-            }
-          ],
-          suggestions: [
-            'اضافه کردن معیارهای کمی به بخش دستاوردها',
-            'برجسته‌تر کردن مهارت‌های مرتبط با مدیریت محصول',
-            'اضافه کردن بخش پروژه‌های کلیدی',
-            'بهبود فرمت‌بندی برای خوانایی بهتر'
-          ]
-        };
-        
-        displayResumeAnalysis(analysisResults);
-        showToast('تحلیل رزومه با موفقیت انجام شد!', 'success');
-      } catch (error) {
-        console.error('Resume analysis error:', error);
-        showToast('خطا در تحلیل رزومه', 'error');
-      }
-    });
-
-    function displayResumeAnalysis(data) {
-      const skillsList = document.getElementById('skillsList');
-      const experienceList = document.getElementById('experienceList');
-      const educationList = document.getElementById('educationList');
-      const suggestionsList = document.getElementById('suggestionsList');
-      
-      // Clear previous results
-      skillsList.innerHTML = '';
-      experienceList.innerHTML = '';
-      educationList.innerHTML = '';
-      suggestionsList.innerHTML = '';
-      
-      // Populate skills
-      data.skills.forEach(skill => {
-        const li = document.createElement('li');
-        li.className = 'flex items-center';
-        li.innerHTML = `<i class="fas fa-check-circle text-blue-600 ml-1"></i> ${skill}`;
-        skillsList.appendChild(li);
-      });
-      
-      // Populate experience
-      data.experience.forEach(exp => {
-        const div = document.createElement('div');
-        div.className = 'border-r-2 border-blue-200 pr-2';
-        div.innerHTML = `
-          <h4 class="font-medium">${exp.title}</h4>
-          <p class="text-sm text-gray-600">${exp.company} • ${exp.duration}</p>
-          <p class="text-sm mt-1">${exp.description}</p>
-        `;
-        experienceList.appendChild(div);
-      });
-      
-      // Populate education
-      data.education.forEach(edu => {
-        const div = document.createElement('div');
-        div.className = 'border-r-2 border-purple-200 pr-2';
-        div.innerHTML = `
-          <h4 class="font-medium">${edu.degree}</h4>
-          <p class="text-sm text-gray-600">${edu.university} • ${edu.year}</p>
-        `;
-        educationList.appendChild(div);
-      });
-      
-      // Populate suggestions
-      data.suggestions.forEach((suggestion, index) => {
-        const div = document.createElement('div');
-        div.className = 'flex items-start';
-        div.innerHTML = `
-          <span class="bg-yellow-100 text-yellow-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium mt-0.5 ml-1">${index + 1}</span>
-          <span>${suggestion}</span>
-        `;
-        suggestionsList.appendChild(div);
-      });
-      
-      // Show analysis section
-      document.getElementById('resumeAnalysis').classList.remove('hidden');
-    }
-
-    // AI Content Generator
-    document.getElementById('generateContent').addEventListener('click', async function() {
-      const topic = document.getElementById('contentTopic').value.trim();
-      if (!topic) {
-        showToast('لطفاً موضوع محتوا را وارد کنید', 'error');
-        return;
-      }
-      
-      const contentType = document.getElementById('contentType').value;
-      const writingStyle = document.getElementById('writingStyle').value;
-      const contentLength = document.getElementById('contentLength').value;
-      
-      // Show loading
-      this.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> در حال تولید محتوا...';
-      
-      try {
-        // In a real app, you would call your AI backend service
-        // This is a simulation with mock data after a delay
-        await new Promise(resolve => setTimeout(resolve, 2500));
-        
-        // Generate mock content based on selections
-        const generatedContent = generateMockContent(topic, contentType, writingStyle, contentLength);
-        
-        // Display results
-        document.getElementById('generatedContent').innerHTML = generatedContent;
-        document.getElementById('contentResult').classList.remove('hidden');
-        
-        showToast('محتوای شما با موفقیت تولید شد!', 'success');
-      } catch (error) {
-        console.error('Content generation error:', error);
-        showToast('خطا در تولید محتوا', 'error');
-      } finally {
-        this.innerHTML = '<i class="fas fa-magic ml-2"></i> تولید محتوا';
-      }
-    });
-
-    function generateMockContent(topic, type, style, length) {
-      // This is a simplified mock content generator
-      // In a real app, you would use an AI API like OpenAI
-      
-      const styles = {
-        professional: "با لحنی رسمی و حرفه‌ای",
-        casual: "با زبانی ساده و خودمانی",
-        persuasive: "با هدف متقاعد کردن خواننده",
-        storytelling: "به صورت روایی و داستان‌گونه"
-      };
-      
-      const lengths = {
-        short: "این محتوای کوتاه",
-        medium: "این محتوای با طول متوسط",
-        long: "این محتوای مفصل و جامع"
-      };
-      
-      const types = {
-        post: "پست لینکدین",
-        article: "مقاله تخصصی",
-        carousel: "کاروسل چندرسانه‌ای",
-        poll: "نظرسنجی تعاملی"
-      };
-      
-      return `
-        <h3>${topic}</h3>
-        <p>${lengths[length]} درباره "${topic}" به صورت ${types[type]} ${styles[style]} تهیه شده است.</p>
-        
-        <p>در دنیای امروز، ${topic} نقش بسیار مهمی در موفقیت کسب‌وکارها ایفا می‌کند. با توجه به تجربیات من در این زمینه، می‌توانم بگویم که...</p>
-        
-        <h4>چرا ${topic} مهم است؟</h4>
-        <ul>
-          <li>افزایش بهره‌وری و کارایی</li>
-          <li>کاهش هزینه‌های عملیاتی</li>
-          <li>بهبود تجربه مشتری</li>
-          <li>ایجاد مزیت رقابتی</li>
-        </ul>
-        
-        <h4>راهکارهای عملی</h4>
-        <p>برای پیاده‌سازی موفق ${topic}، این مراحل را در نظر بگیرید:</p>
-        <ol>
-          <li>تحلیل نیازهای کسب‌وکار</li>
-          <li>طراحی راهکار متناسب</li>
-          <li>اجرای مرحله‌به‌مرحله</li>
-          <li>اندازه‌گیری نتایج</li>
-        </ol>
-        
-        <p>نظر شما چیست؟ چه تجربیاتی در زمینه ${topic} دارید؟ دوست دارم در بخش کامنت‌ها با من به اشتراک بگذارید.</p>
-        
-        <p>#${topic.replace(/\s+/g, '_')} #مدیریت #حرفه‌ای</p>
-      `;
-    }
-
-    // Copy content button
-    document.getElementById('copyContent').addEventListener('click', function() {
-      const content = document.getElementById('generatedContent').textContent;
-      navigator.clipboard.writeText(content);
-      showToast('محتوا با موفقیت کپی شد!', 'success');
-    });
-
-    // Post to LinkedIn button
-    document.getElementById('postToLinkedIn').addEventListener('click', async function() {
-      // In a real app, you would call LinkedIn API to post the content
-      showToast('در حال ارسال پست به لینکدین...', 'info');
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      showToast('پست با موفقیت در لینکدین منتشر شد!', 'success');
-    });
-
-    // Initialize Analytics Chart
-    function initAnalyticsChart() {
-      const ctx = document.getElementById('analyticsChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور'],
-          datasets: [
-            {
-              label: 'نمایش پروفایل',
-              data: [850, 920, 1020, 980, 1100, 1248],
-              borderColor: '#3B82F6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              tension: 0.3,
-              fill: true
-            },
-            {
-              label: 'مشاهده پست‌ها',
-              data: [3200, 3800, 4200, 4500, 5100, 5736],
-              borderColor: '#10B981',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              tension: 0.3,
-              fill: true
-            },
-            {
-              label: 'نرخ تعامل',
-              data: [5.2, 6.1, 6.8, 7.2, 7.8, 8.2],
-              borderColor: '#8B5CF6',
-              backgroundColor: 'rgba(139, 92, 246, 0.1)',
-              tension: 0.3,
-              fill: true,
-              yAxisID: 'y1'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'top',
-              rtl: true
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: false
-            },
-            y1: {
-              position: 'right',
-              beginAtZero: false,
-              min: 0,
-              max: 10,
-              grid: {
-                drawOnChartArea: false
-              }
-            }
-          },
-          rtl: true
-        }
-      });
-    }
-
-    // Toast notification
+    // ==================== اعلان ها ====================
     function showToast(message, type) {
       const toast = document.createElement('div');
-      let bgColor = 'bg-blue-600';
+      const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        info: 'bg-blue-600'
+      };
       
-      if (type === 'success') bgColor = 'bg-green-600';
-      if (type === 'error') bgColor = 'bg-red-600';
-      if (type === 'info') bgColor = 'bg-blue-600';
-      
-      toast.className = `fixed bottom-4 left-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-8 opacity-0`;
+      toast.className = `fixed bottom-4 left-4 ${colors[type]} text-white px-4 py-2 rounded-lg shadow-lg z-50`;
       toast.textContent = message;
       document.body.appendChild(toast);
       
       setTimeout(() => {
-        toast.classList.remove('translate-y-8');
-        toast.classList.remove('opacity-0');
-      }, 10);
-      
-      setTimeout(() => {
-        toast.classList.add('translate-y-8');
-        toast.classList.add('opacity-0');
-        setTimeout(() => {
-          document.body.removeChild(toast);
-        }, 300);
+        toast.remove();
       }, 3000);
     }
 
-    // Initialize the page
-    window.addEventListener('DOMContentLoaded', function() {
-      initAnalyticsChart();
-      
-      // Check for existing auth
-      if (localStorage.getItem('linkedin_access_token')) {
-        // In a real app, you would verify the token and fetch profile
-        const profileData = {
-          name: "علی رضایی",
-          headline: "مدیر محصول دیجیتال | متخصص رشد کسب‌وکار",
-          industry: "فناوری اطلاعات و خدمات",
-          position: "مدیر ارشد محصول در شرکت نمونه",
-          location: "تهران، ایران",
-          connections: "500+",
-          profileImage: "https://randomuser.me/api/portraits/men/32.jpg"
-        };
-        displayProfile(profileData);
-      }
+    // ==================== مقداردهی اولیه ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuthStatus();
     });
-
   </script>
 </body>
 </html>
