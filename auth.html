@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>در حال احراز هویت</title>
+  <script>
+    // دریافت کد از URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+
+    // ذخیره توکن و بستن پنجره
+    if (code) {
+      localStorage.setItem('linkedin_auth_code', code);
+      window.opener.postMessage({ type: 'linkedin_auth', code }, '*');
+      window.close();
+    }
+  </script>
+</head>
+<body>
+  <p style="text-align: center; margin-top: 50px;">در حال تکمیل احراز هویت... لطفاً صبر کنید</p>
+</body>
+</html>
