@@ -66,13 +66,13 @@
   </div>
 
   <script>
-    // ==================== تنظیمات شما ====================
+    // ==================== تنظیمات اتصال به LinkedIn ====================
     const LINKEDIN_CONFIG = {
-      CLIENT_ID: '78iihkedifumfl', // جایگزین کنید
-      CLIENT_SECRET: 'WPL_AP1.Oqh5rNxg9fLnm2zf.4D/X4g==', // جایگزین کنید
-      REDIRECT_URI: encodeURIComponent('https://hosseincagey.github.io/linkdin/auth'), // باید با تنظیمات LinkedIn تطابق داشته باشد
+      CLIENT_ID: '78iihkedifumfl',
+      CLIENT_SECRET: 'WPL_AP1.Oqh5rNxg9fLnm2zf.4D/X4g==',
+      REDIRECT_URI: encodeURIComponent('https://hosseincagey.github.io/linkdin/auth'),
       SCOPE: encodeURIComponent('r_liteprofile r_emailaddress'),
-      STATE: '123456' // برای جلوگیری از CSRF
+      STATE: '123456'
     };
 
     // ==================== عناصر DOM ====================
@@ -97,11 +97,19 @@
 
     // ==================== نمایش پروفایل ====================
     function displayProfile(profile) {
-      document.getElementById('profileName').textContent = profile.name;
+      document.getElementById('profileName').textContent = profile.localizedFirstName + ' ' + profile.localizedLastName || 'کاربر ناشناس';
       document.getElementById('profileHeadline').textContent = profile.headline || 'بدون عنوان';
-      document.getElementById('profileEmail').textContent = profile.email;
-      document.getElementById('profileId').textContent = profile.id;
-      document.getElementById('profileImage').src = profile.picture || 'https://via.placeholder.com/150';
+      document.getElementById('profileEmail').textContent = profile.email || 'عدم نمایش';
+      document.getElementById('profileId').textContent = profile.id || 'نامشخص';
+      document.getElementById('profileImage').src = profile.profilePicture?.displayImage || 'https://via.placeholder.com/150';
+      
+      if (profile.industry) {
+        document.getElementById('profileIndustry').textContent = profile.industry;
+      }
+      if (profile.positions) {
+        const primaryPosition = profile.positions.values.find(p => p.isCurrent);
+        document.getElementById('profilePosition').textContent = primaryPosition?.title || 'نامشخص';
+      }
       
       profileSection.classList.remove('hidden');
       authBtn.style.display = 'none';
@@ -136,9 +144,95 @@
       }, 3000);
     }
 
+    // ==================== پردازش کد بازگشتی از LinkedIn ====================
+    function handleCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const error = urlParams.get('error');
+      const state = urlParams.get('state');
+      
+      if (error) {
+        showToast(`خطا در احراز هویت: ${error}`, 'error');
+        return;
+      }
+      
+      if (code && state === LINKEDIN_CONFIG.STATE) {
+        // در اینجا باید کد را به سرور خود ارسال کنید تا توکن دریافت شود
+        // این بخش نیاز به پیاده‌سازی سمت سرور دارد
+        showToast('در حال دریافت اطلاعات از LinkedIn...', 'info');
+        
+        // نمونه کد برای ارسال به سرور (نیاز به پیاده‌سازی سمت سرور دارد)
+        fetch('https://your-server.com/api/linkedin/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: code,
+            redirect_uri: decodeURIComponent(LINKEDIN_CONFIG.REDIRECT_URI),
+            client_id: LINKEDIN_CONFIG.CLIENT_ID,
+            client_secret: LINKEDIN_CONFIG.CLIENT_SECRET
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.access_token) {
+            localStorage.setItem('linkedin_token', data.access_token);
+            // دریافت اطلاعات پروفایل
+            return fetchProfileData(data.access_token);
+          } else {
+            throw new Error('خطا در دریافت توکن دسترسی');
+          }
+        })
+        .catch(error => {
+          showToast(error.message, 'error');
+        });
+      }
+    }
+
+    // ==================== دریافت اطلاعات پروفایل ====================
+    function fetchProfileData(accessToken) {
+      // درخواست به API LinkedIn برای دریافت اطلاعات پایه
+      return fetch('https://api.linkedin.com/v2/me', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Connection': 'Keep-Alive'
+        }
+      })
+      .then(response => response.json())
+      .then(profileData => {
+        // درخواست برای دریافت آدرس ایمیل
+        return fetch('https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Connection': 'Keep-Alive'
+          }
+        })
+        .then(response => response.json())
+        .then(emailData => {
+          const email = emailData.elements?.[0]?.['handle~']?.emailAddress;
+          
+          // ذخیره اطلاعات در localStorage
+          const profile = {
+            ...profileData,
+            email: email
+          };
+          
+          localStorage.setItem('linkedin_profile', JSON.stringify(profile));
+          displayProfile(profile);
+          showToast('اتصال با موفقیت انجام شد', 'success');
+        });
+      })
+      .catch(error => {
+        console.error('خطا در دریافت اطلاعات:', error);
+        showToast('خطا در دریافت اطلاعات پروفایل', 'error');
+      });
+    }
+
     // ==================== مقداردهی اولیه ====================
     document.addEventListener('DOMContentLoaded', () => {
       checkAuthStatus();
+      handleCallback();
     });
   </script>
 </body>
