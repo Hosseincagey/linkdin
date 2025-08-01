@@ -20,10 +20,6 @@
     .linkedin-auth:hover {
       background-color: #004182;
     }
-    .fallback-option {
-      background-color: #f0fdf4;
-      border-left: 4px solid #22c55e;
-    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -44,210 +40,179 @@
         <p class="text-sm text-gray-500 mt-3">برای استفاده از تمام قابلیت‌ها، لطفاً حساب لینکدین خود را متصل کنید</p>
       </div>
       
-      <div id="fallbackSection" class="hidden mt-6 p-4 rounded-lg fallback-option">
-        <h3 class="font-medium text-green-800 mb-2">راهکارهای جایگزین</h3>
-        <div class="space-y-3">
-          <div class="p-3 bg-white rounded-lg border">
-            <h4 class="font-medium flex items-center">
-              <i class="fas fa-globe ml-2 text-blue-500"></i>
-              روش ۱: استفاده از پروکسی سرور
-            </h4>
-            <p class="text-sm text-gray-600 mt-1">این روش از یک سرور واسط برای اتصال استفاده می‌کند:</p>
-            <button id="proxyAuth" class="mt-2 bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm">
-              <i class="fas fa-server ml-1"></i> اتصال از طریق پروکسی
-            </button>
-          </div>
-          
-          <div class="p-3 bg-white rounded-lg border">
-            <h4 class="font-medium flex items-center">
-              <i class="fas fa-mobile-alt ml-2 text-purple-500"></i>
-              روش ۲: دریافت کد دستی
-            </h4>
-            <p class="text-sm text-gray-600 mt-1">می‌توانید به صورت دستی از LinkedIn کد دریافت کنید:</p>
-            <button id="manualAuth" class="mt-2 bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm">
-              <i class="fas fa-keyboard ml-1"></i> راهنمای دریافت کد دستی
-            </button>
+      <div id="profileSection" class="hidden mt-4 p-4 bg-gray-50 border rounded-lg">
+        <div class="flex items-center">
+          <img id="profileImage" src="" alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow">
+          <div class="mr-3">
+            <h3 id="profileName" class="font-medium text-gray-800"></h3>
+            <p id="profileHeadline" class="text-sm text-gray-600"></p>
           </div>
         </div>
-      </div>
-      
-      <div id="profileSection" class="hidden mt-4 p-4 bg-gray-50 border rounded-lg">
-        <!-- محتوای پروفایل -->
+        <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+          <p><span class="font-medium">صنعت:</span> <span id="profileIndustry"></span></p>
+          <p><span class="font-medium">ایمیل:</span> <span id="profileEmail"></span></p>
+          <p><span class="font-medium">موقعیت:</span> <span id="profilePosition"></span></p>
+          <p><span class="font-medium">شناسه کاربری:</span> <span id="profileId"></span></p>
+        </div>
+        <button id="logoutBtn" class="mt-4 text-red-600 hover:text-red-800 text-sm">
+          <i class="fas fa-sign-out-alt ml-1"></i> خروج از حساب
+        </button>
       </div>
     </section>
-
-    <!-- Modal برای دریافت کد دستی -->
-    <div id="manualAuthModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h3 class="font-bold text-lg mb-4">دریافت کد دستی از LinkedIn</h3>
-        <ol class="list-decimal list-inside space-y-2 text-sm">
-          <li>به <a href="https://www.linkedin.com" target="_blank" class="text-blue-500">LinkedIn</a> وارد شوید</li>
-          <li>به این آدرس بروید: <code class="bg-gray-100 p-1 rounded">https://www.linkedin.com/developers/tools/oauth</code></li>
-          <li>مقادیر زیر را وارد کنید:
-            <ul class="list-disc list-inside mt-1 ml-4">
-              <li>Client ID: <code class="bg-gray-100 p-1 rounded">78iihkedifumfl</code></li>
-              <li>Redirect URI: <code class="bg-gray-100 p-1 rounded">https://hosseincagey.github.io/linkdin/auth</code></li>
-              <li>Scope: <code class="bg-gray-100 p-1 rounded">r_liteprofile r_emailaddress</code></li>
-            </ul>
-          </li>
-          <li>روی دکمه "Get Authorization Code" کلیک کنید</li>
-          <li>کد دریافتی را در اینجا وارد کنید:</li>
-        </ol>
-        <div class="mt-4">
-          <input type="text" id="manualAuthCode" placeholder="کد دریافتی" class="w-full p-2 border rounded">
-          <button id="submitManualCode" class="mt-3 bg-blue-500 text-white px-4 py-2 rounded w-full">
-            تایید کد
-          </button>
-        </div>
-        <button id="closeManualModal" class="mt-3 text-gray-500 w-full">انصراف</button>
-      </div>
-    </div>
   </div>
 
   <script>
-    // ==================== تنظیمات پیشرفته ====================
+    // ==================== تنظیمات اتصال ====================
     const LINKEDIN_CONFIG = {
       CLIENT_ID: '78iihkedifumfl',
-      CLIENT_SECRET: 'WPL_AP1.Oqh5rNxg9fLnm2zf.4D/X4g==',
-      REDIRECT_URI: encodeURIComponent('https://hosseincagey.github.io/linkdin/auth'),
+      REDIRECT_URI: encodeURIComponent(window.location.origin + '/auth'), // تغییر به آدرس اصلی شما
       SCOPE: encodeURIComponent('r_liteprofile r_emailaddress'),
-      STATE: '123456',
-      PROXY_SERVER: 'https://cors-proxy.example.com/api/linkedin' // جایگزین با آدرس پروکسی واقعی
+      STATE: '123456'
     };
 
     // ==================== عناصر DOM ====================
     const authBtn = document.getElementById('linkedInAuth');
-    const fallbackSection = document.getElementById('fallbackSection');
-    const proxyAuth = document.getElementById('proxyAuth');
-    const manualAuth = document.getElementById('manualAuth');
-    const manualAuthModal = document.getElementById('manualAuthModal');
-    const closeManualModal = document.getElementById('closeManualModal');
-    const submitManualCode = document.getElementById('submitManualCode');
-    const manualAuthCode = document.getElementById('manualAuthCode');
+    const profileSection = document.getElementById('profileSection');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-    // ==================== مدیریت احراز هویت اصلی ====================
+    // ==================== مدیریت احراز هویت ====================
     authBtn.addEventListener('click', () => {
+      // ذخیره محل فعلی برای بازگشت بعد از احراز هویت
+      sessionStorage.setItem('preAuthUrl', window.location.href);
+      
       const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CONFIG.CLIENT_ID}&redirect_uri=${LINKEDIN_CONFIG.REDIRECT_URI}&scope=${LINKEDIN_CONFIG.SCOPE}&state=${LINKEDIN_CONFIG.STATE}`;
+      window.location.href = authUrl;
+    });
+
+    // ==================== پردازش بازگشت از LinkedIn ====================
+    function handleCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const error = urlParams.get('error');
+      const state = urlParams.get('state');
       
-      // باز کردن در پنجره جدید با کنترل بیشتر
-      const authWindow = window.open(authUrl, '_blank', 'width=600,height=700');
-      
-      // بررسی وضعیت پنجره هر 500ms
-      const checkWindow = setInterval(() => {
-        if (authWindow.closed) {
-          clearInterval(checkWindow);
-          checkForError();
-        }
-      }, 500);
-      
-      // بعد از 10 ثانیه اگر پنجره باز بود و مشکلی پیش آمد
-      setTimeout(() => {
-        if (!authWindow.closed) {
-          authWindow.close();
-          showFallbackOptions();
-        }
-      }, 10000);
-    });
-
-    // ==================== بررسی خطا ====================
-    function checkForError() {
-      // اینجا می‌توانید localStorage یا sessionStorage را برای خطا بررسی کنید
-      if (sessionStorage.getItem('linkedin_error')) {
-        showFallbackOptions();
-        sessionStorage.removeItem('linkedin_error');
-      }
-    }
-
-    // ==================== نمایش راهکارهای جایگزین ====================
-    function showFallbackOptions() {
-      fallbackSection.classList.remove('hidden');
-      authBtn.disabled = true;
-    }
-
-    // ==================== احراز هویت از طریق پروکسی ====================
-    proxyAuth.addEventListener('click', async () => {
-      try {
-        const response = await fetch(LINKEDIN_CONFIG.PROXY_SERVER, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            client_id: LINKEDIN_CONFIG.CLIENT_ID,
-            redirect_uri: decodeURIComponent(LINKEDIN_CONFIG.REDIRECT_URI),
-            scope: decodeURIComponent(LINKEDIN_CONFIG.SCOPE)
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.authUrl) {
-          window.location.href = data.authUrl;
-        } else {
-          alert('خطا در ارتباط با سرور پروکسی');
-        }
-      } catch (error) {
-        console.error('خطا در اتصال به پروکسی:', error);
-        alert('خطا در اتصال به سرور پروکسی');
-      }
-    });
-
-    // ==================== مدیریت احراز هویت دستی ====================
-    manualAuth.addEventListener('click', () => {
-      manualAuthModal.classList.remove('hidden');
-    });
-
-    closeManualModal.addEventListener('click', () => {
-      manualAuthModal.classList.add('hidden');
-    });
-
-    submitManualCode.addEventListener('click', async () => {
-      const code = manualAuthCode.value.trim();
-      if (!code) {
-        alert('لطفاً کد دریافتی را وارد کنید');
+      if (error) {
+        console.error('خطا در احراز هویت:', error);
         return;
       }
       
-      // ارسال کد به سرور برای دریافت توکن
-      try {
-        // این بخش نیاز به پیاده‌سازی سمت سرور دارد
-        const response = await fetch('https://your-backend.com/api/linkedin/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            code: code,
-            redirect_uri: decodeURIComponent(LINKEDIN_CONFIG.REDIRECT_URI),
-            client_id: LINKEDIN_CONFIG.CLIENT_ID,
-            client_secret: LINKEDIN_CONFIG.CLIENT_SECRET
+      if (code && state === LINKEDIN_CONFIG.STATE) {
+        // دریافت توکن دسترسی از سرور شما
+        getAccessToken(code)
+          .then(data => {
+            if (data.access_token) {
+              localStorage.setItem('linkedin_token', data.access_token);
+              // دریافت اطلاعات پروفایل
+              return getProfileData(data.access_token);
+            }
           })
-        });
-        
-        const data = await response.json();
-        
-        if (data.access_token) {
-          localStorage.setItem('linkedin_token', data.access_token);
-          manualAuthModal.classList.add('hidden');
-          alert('اتصال با موفقیت انجام شد!');
-          // ادامه فرآیند...
-        } else {
-          throw new Error(data.error || 'خطا در دریافت توکن');
-        }
-      } catch (error) {
-        console.error('خطا در احراز هویت دستی:', error);
-        alert(error.message);
+          .then(profile => {
+            if (profile) {
+              displayProfile(profile);
+              // بازگشت به صفحه اصلی
+              const preAuthUrl = sessionStorage.getItem('preAuthUrl');
+              if (preAuthUrl) {
+                window.location.href = preAuthUrl;
+              }
+            }
+          })
+          .catch(error => {
+            console.error('خطا در فرآیند احراز هویت:', error);
+          });
       }
+    }
+
+    // ==================== دریافت توکن دسترسی از سرور ====================
+    async function getAccessToken(code) {
+      // این تابع باید به سرور شما متصل شود
+      const response = await fetch('https://your-server.com/api/linkedin/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: code,
+          redirect_uri: decodeURIComponent(LINKEDIN_CONFIG.REDIRECT_URI),
+          client_id: LINKEDIN_CONFIG.CLIENT_ID
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('خطا در دریافت توکن');
+      }
+      
+      return response.json();
+    }
+
+    // ==================== دریافت اطلاعات پروفایل ====================
+    async function getProfileData(accessToken) {
+      try {
+        // دریافت اطلاعات پایه
+        const profileResponse = await fetch('https://api.linkedin.com/v2/me', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const profileData = await profileResponse.json();
+        
+        // دریافت ایمیل
+        const emailResponse = await fetch('https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        });
+        const emailData = await emailResponse.json();
+        
+        return {
+          ...profileData,
+          email: emailData.elements?.[0]?.['handle~']?.emailAddress
+        };
+      } catch (error) {
+        console.error('خطا در دریافت پروفایل:', error);
+        return null;
+      }
+    }
+
+    // ==================== نمایش پروفایل ====================
+    function displayProfile(profile) {
+      document.getElementById('profileName').textContent = 
+        `${profile.localizedFirstName} ${profile.localizedLastName}` || 'کاربر ناشناس';
+      document.getElementById('profileHeadline').textContent = 
+        profile.headline || 'بدون عنوان';
+      document.getElementById('profileEmail').textContent = 
+        profile.email || 'عدم نمایش';
+      document.getElementById('profileId').textContent = 
+        profile.id || 'نامشخص';
+      
+      profileSection.classList.remove('hidden');
+      authBtn.style.display = 'none';
+    }
+
+    // ==================== مدیریت خروج ====================
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('linkedin_token');
+      profileSection.classList.add('hidden');
+      authBtn.style.display = 'flex';
     });
+
+    // ==================== بررسی وضعیت ورود ====================
+    function checkAuthStatus() {
+      const token = localStorage.getItem('linkedin_token');
+      if (token) {
+        // اگر توکن وجود دارد، اطلاعات پروفایل را دریافت کن
+        getProfileData(token)
+          .then(profile => {
+            if (profile) {
+              displayProfile(profile);
+            }
+          });
+      }
+    }
 
     // ==================== مقداردهی اولیه ====================
     document.addEventListener('DOMContentLoaded', () => {
-      // بررسی وجود توکن در localStorage
-      if (localStorage.getItem('linkedin_token')) {
-        // کاربر قبلاً وارد شده است
-        document.getElementById('profileSection').classList.remove('hidden');
-        authBtn.style.display = 'none';
-      }
+      checkAuthStatus();
+      handleCallback();
     });
   </script>
 </body>
